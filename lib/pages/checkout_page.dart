@@ -5,23 +5,22 @@ import '../services/absen_service.dart';
 import '../pages/login_page.dart';
 import '../pages/leaflet_map_picker_page.dart';
 
-class AbsenPage extends StatefulWidget {
+class CheckoutPage extends StatefulWidget {
   final String nik;
 
-  const AbsenPage({super.key, required this.nik});
+  const CheckoutPage({super.key, required this.nik});
 
   @override
-  State<AbsenPage> createState() => _AbsenPageState();
+  State<CheckoutPage> createState() => _CheckoutPageState();
 }
 
-class _AbsenPageState extends State<AbsenPage>
+class _CheckoutPageState extends State<CheckoutPage>
     with SingleTickerProviderStateMixin {
   late TextEditingController nikCtrl;
   late TextEditingController tanggalCtrl;
   late TextEditingController jamCtrl;
   late TextEditingController latCtrl;
   late TextEditingController longCtrl;
-  late TextEditingController shiftCtrl;
 
   String selectedMood = 'SENANG';
   final List<String> moodOptions = ['SENANG', 'BAHAGIA', 'GALAU', 'MARAH'];
@@ -30,21 +29,6 @@ class _AbsenPageState extends State<AbsenPage>
     'BAHAGIA': Icons.sentiment_very_satisfied,
     'GALAU': Icons.sentiment_neutral,
     'MARAH': Icons.sentiment_dissatisfied,
-  };
-
-  String selectedAbsenType = 'N';
-  final List<String> absenTypeOptions = ['N', 'H', 'I', 'D'];
-  final Map<String, String> absenTypeLabels = {
-    'N': 'WFO (Kantor)',
-    'H': 'WFH (Rumah)',
-    'I': 'Izin',
-    'D': 'Dinas',
-  };
-  final Map<String, IconData> absenTypeIcons = {
-    'N': Icons.business,
-    'H': Icons.home,
-    'I': Icons.event_note,
-    'D': Icons.work,
   };
 
   bool loading = false;
@@ -64,7 +48,6 @@ class _AbsenPageState extends State<AbsenPage>
     );
     latCtrl = TextEditingController();
     longCtrl = TextEditingController();
-    shiftCtrl = TextEditingController(text: '0');
     selectedMood = 'SENANG';
 
     _animationController = AnimationController(
@@ -83,7 +66,6 @@ class _AbsenPageState extends State<AbsenPage>
     jamCtrl.dispose();
     latCtrl.dispose();
     longCtrl.dispose();
-    shiftCtrl.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -149,7 +131,7 @@ class _AbsenPageState extends State<AbsenPage>
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF3B82F6)),
+            colorScheme: const ColorScheme.light(primary: Color(0xFFE53935)),
           ),
           child: child!,
         );
@@ -168,7 +150,7 @@ class _AbsenPageState extends State<AbsenPage>
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF3B82F6)),
+            colorScheme: const ColorScheme.light(primary: Color(0xFFE53935)),
           ),
           child: child!,
         );
@@ -181,13 +163,12 @@ class _AbsenPageState extends State<AbsenPage>
     }
   }
 
-  Future<void> doCheckIn() async {
+  Future<void> doCheckOut() async {
     if (nikCtrl.text.isEmpty ||
         tanggalCtrl.text.isEmpty ||
         jamCtrl.text.isEmpty ||
         latCtrl.text.isEmpty ||
-        longCtrl.text.isEmpty ||
-        shiftCtrl.text.isEmpty) {
+        longCtrl.text.isEmpty) {
       _showSnackBar('Semua field harus diisi', isError: true);
       return;
     }
@@ -195,15 +176,13 @@ class _AbsenPageState extends State<AbsenPage>
     setState(() => loading = true);
 
     try {
-      final result = await AbsenService.checkIn(
+      final result = await AbsenService.checkOut(
         nik: nikCtrl.text,
         tanggal: tanggalCtrl.text,
         jam: jamCtrl.text,
         lat: double.parse(latCtrl.text),
         long: double.parse(longCtrl.text),
-        shift: shiftCtrl.text,
         mood: selectedMood,
-        jenisAbsen: selectedAbsenType,
       );
 
       setState(() {
@@ -262,7 +241,7 @@ class _AbsenPageState extends State<AbsenPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6), Color(0xFF06B6D4)],
+            colors: [Color(0xFF7F1D1D), Color(0xFFE53935), Color(0xFFEF5350)],
           ),
         ),
         child: SafeArea(
@@ -302,7 +281,7 @@ class _AbsenPageState extends State<AbsenPage>
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.calendar_today, color: Colors.white),
+            child: const Icon(Icons.logout_outlined, color: Colors.white),
           ),
           const SizedBox(width: 16),
           const Expanded(
@@ -310,7 +289,7 @@ class _AbsenPageState extends State<AbsenPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Form Absensi',
+                  'Form Check-Out',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -318,7 +297,7 @@ class _AbsenPageState extends State<AbsenPage>
                   ),
                 ),
                 Text(
-                  'Isi data kehadiran Anda',
+                  'Akhiri kehadiran Anda',
                   style: TextStyle(fontSize: 14, color: Colors.white70),
                 ),
               ],
@@ -331,7 +310,7 @@ class _AbsenPageState extends State<AbsenPage>
                 MaterialPageRoute(builder: (_) => const LoginPage()),
               );
             },
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.home, color: Colors.white),
             style: IconButton.styleFrom(
               backgroundColor: Colors.white.withOpacity(0.2),
             ),
@@ -362,7 +341,7 @@ class _AbsenPageState extends State<AbsenPage>
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.person, color: Color(0xFF3B82F6), size: 32),
+            child: const Icon(Icons.person, color: Color(0xFFE53935), size: 32),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -409,7 +388,7 @@ class _AbsenPageState extends State<AbsenPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Data Absensi',
+              'Data Check-Out',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -420,10 +399,6 @@ class _AbsenPageState extends State<AbsenPage>
             _buildDateTimeSection(),
             const SizedBox(height: 24),
             _buildLocationSection(),
-            const SizedBox(height: 24),
-            _buildShiftField(),
-            const SizedBox(height: 24),
-            _buildAbsenTypeSelector(),
             const SizedBox(height: 24),
             _buildMoodSelector(),
             const SizedBox(height: 32),
@@ -499,7 +474,7 @@ class _AbsenPageState extends State<AbsenPage>
               child: _buildIconButton(
                 label: 'GPS',
                 icon: Icons.my_location,
-                color: const Color(0xFF3B82F6),
+                color: const Color(0xFFE53935),
                 onPressed: loading ? null : _getCurrentLocation,
               ),
             ),
@@ -513,78 +488,6 @@ class _AbsenPageState extends State<AbsenPage>
               ),
             ),
           ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildShiftField() {
-    return _buildTextField(
-      controller: shiftCtrl,
-      label: 'Shift',
-      icon: Icons.schedule,
-      keyboardType: TextInputType.number,
-    );
-  }
-
-  Widget _buildAbsenTypeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Jenis Absen',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF475569),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: absenTypeOptions.map((type) {
-            final isSelected = selectedAbsenType == type;
-            return InkWell(
-              onTap: () => setState(() => selectedAbsenType = type),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF3B82F6)
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF3B82F6)
-                        : Colors.grey.shade300,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      absenTypeIcons[type],
-                      color: isSelected ? Colors.white : Colors.grey.shade700,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      absenTypeLabels[type]!,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.grey.shade700,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
         ),
       ],
     );
@@ -614,12 +517,12 @@ class _AbsenPageState extends State<AbsenPage>
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF3B82F6)
+                      ? const Color(0xFFE53935)
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFF3B82F6)
+                        ? const Color(0xFFE53935)
                         : Colors.grey.shade300,
                   ),
                 ),
@@ -656,18 +559,18 @@ class _AbsenPageState extends State<AbsenPage>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient: const LinearGradient(
-          colors: [Color(0xFF10B981), Color(0xFF059669)],
+          colors: [Color(0xFFE53935), Color(0xFFC62828)],
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF10B981).withOpacity(0.4),
+            color: const Color(0xFFE53935).withOpacity(0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
         ],
       ),
       child: ElevatedButton(
-        onPressed: loading ? null : doCheckIn,
+        onPressed: loading ? null : doCheckOut,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
@@ -687,10 +590,10 @@ class _AbsenPageState extends State<AbsenPage>
             : const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle, color: Colors.white),
+                  Icon(Icons.logout, color: Colors.white),
                   SizedBox(width: 12),
                   Text(
-                    'SUBMIT ABSEN',
+                    'SUBMIT CHECK-OUT',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -732,7 +635,7 @@ class _AbsenPageState extends State<AbsenPage>
             controller: controller,
             keyboardType: keyboardType ?? TextInputType.number,
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: const Color(0xFF3B82F6), size: 20),
+              prefixIcon: Icon(icon, color: const Color(0xFFE53935), size: 20),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -799,7 +702,7 @@ class _AbsenPageState extends State<AbsenPage>
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 icon: Icon(icon, size: 20),
-                color: const Color(0xFF3B82F6),
+                color: const Color(0xFFE53935),
                 onPressed: onPickerTap,
                 tooltip: 'Pilih dari picker',
               ),
